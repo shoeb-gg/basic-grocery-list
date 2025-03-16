@@ -1,10 +1,14 @@
 <ion-app>
   <ion-header [translucent]="true">
     <ion-toolbar>
-      <ion-buttons slot="start">
+      <!-- <ion-buttons slot="start">
         <ion-menu-button></ion-menu-button>
-      </ion-buttons>
-      <ion-title></ion-title>
+      </ion-buttons> -->
+      <ion-title class="text-center font-bold text-2xl" color="tertiary">Default</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <ion-content [fullscreen]="true" class="ion-padding">
+    <app-list-container></app-list-container>
+  </ion-content>
 </ion-app>
