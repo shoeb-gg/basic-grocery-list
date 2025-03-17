@@ -7,12 +7,14 @@ import {
   IonCheckbox,
 } from '@ionic/angular/standalone';
 
+import { InputContainerComponent } from '../input-container/input-container.component';
+
 @Component({
   selector: 'app-list-container',
   templateUrl: './list-container.component.html',
   styleUrls: ['./list-container.component.scss'],
   standalone: true,
-  imports: [IonList, IonItem, IonLabel, IonCheckbox],
+  imports: [IonList, IonItem, IonLabel, IonCheckbox, InputContainerComponent],
 })
 export class ListContainerComponent implements OnInit {
   constructor() {}
