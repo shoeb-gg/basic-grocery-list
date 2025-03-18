@@ -7,7 +7,9 @@ import {
   IonTitle,
   IonContent,
 } from '@ionic/angular/standalone';
+
 import { ListContainerComponent } from './component/list-container/list-container.component';
+import { FloatingBtnComponent } from './component/floating-btn/floating-btn.component';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +22,7 @@ import { ListContainerComponent } from './component/list-container/list-containe
     IonContent,
     IonTitle,
     ListContainerComponent,
+    FloatingBtnComponent,
   ],
 })
 export class AppComponent {

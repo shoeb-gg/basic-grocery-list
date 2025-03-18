@@ -3,3 +3,11 @@ ng-deep {
     @apply flex! items-center!;
   }
 }
+
+ion-checkbox {
+  --size: 1.7rem;
+}
+
+ion-checkbox::part(container) {
+  border-radius: 5px;
+}
