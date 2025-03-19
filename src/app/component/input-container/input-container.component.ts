@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-
 import { IonInput, IonItem, IonIcon } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
+
+import { InputHandlerService } from 'src/app/services/input-handler.service';
 
 @Component({
   selector: 'app-input-container',
@@ -12,9 +13,13 @@ import { add } from 'ionicons/icons';
   imports: [IonInput, IonItem, IonIcon],
 })
 export class InputContainerComponent implements OnInit {
-  constructor() {
+  constructor(private readonly inputHandler: InputHandlerService) {
     addIcons({ add });
   }
 
   ngOnInit() {}
+
+  valueChange(event: CustomEvent) {
+    this.inputHandler.inputValue.set(event.detail.value);
+  }
 }
