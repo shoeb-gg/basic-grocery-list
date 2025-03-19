@@ -1,5 +1,15 @@
-<ion-fab slot="fixed" vertical="bottom" horizontal="end">
-  <ion-fab-button>
+<ion-fab vertical="bottom" horizontal="end">
+  @if (inputHandler.inputValue() === '') {
+
+  <ion-fab-button color="tertiary">
     <ion-icon name="add"></ion-icon>
   </ion-fab-button>
+
+  } @else {
+
+  <ion-fab-button color="success">
+    <ion-icon name="checkmark-sharp"></ion-icon>
+  </ion-fab-button>
+
+  }
 </ion-fab>

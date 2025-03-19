@@ -6,6 +6,7 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
+  IonFooter,
 } from '@ionic/angular/standalone';
 
 import { ListContainerComponent } from './component/list-container/list-container.component';
@@ -16,6 +17,7 @@ import { FloatingBtnComponent } from './component/floating-btn/floating-btn.comp
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   imports: [
+    IonFooter,
     IonApp,
     IonHeader,
     IonToolbar,

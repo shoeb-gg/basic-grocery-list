@@ -9,6 +9,8 @@ import {
 
 import { InputContainerComponent } from '../input-container/input-container.component';
 
+import { InputHandlerService } from 'src/app/services/input-handler.service';
+
 @Component({
   selector: 'app-list-container',
   templateUrl: './list-container.component.html',
@@ -17,7 +19,7 @@ import { InputContainerComponent } from '../input-container/input-container.comp
   imports: [IonList, IonItem, IonLabel, IonCheckbox, InputContainerComponent],
 })
 export class ListContainerComponent implements OnInit {
-  constructor() {}
+  constructor(public readonly inputHandler: InputHandlerService) {}
 
   ngOnInit() {}
 }
