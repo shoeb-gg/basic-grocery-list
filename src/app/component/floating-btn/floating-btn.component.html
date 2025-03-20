@@ -1,13 +1,13 @@
 <ion-fab vertical="bottom" horizontal="end">
   @if (inputHandler.inputValue() === '') {
 
-  <ion-fab-button color="tertiary">
+  <ion-fab-button color="tertiary" (click)="this.inputHandler.inputFocus.set(true)">
     <ion-icon name="add"></ion-icon>
   </ion-fab-button>
 
   } @else {
 
-  <ion-fab-button color="success">
+  <ion-fab-button color="success" (click)="addToList()">
     <ion-icon name="checkmark-sharp"></ion-icon>
   </ion-fab-button>
 

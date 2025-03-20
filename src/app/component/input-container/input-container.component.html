@@ -1,5 +1,14 @@
 <ion-item>
-  <ion-input clearInput="true" placeholder="Enter item name" enterkeyhint="done" mode="ios" (ionInput)="valueChange($event)">
-    <ion-icon class="text-lg pl-1 pr-1.5" slot="start" name="add"></ion-icon>
+  <ion-input
+    #THE_INPUT
+    clearInput="true"
+    placeholder="Enter item name"
+    enterkeyhint="done"
+    mode="ios"
+    [value]="inputHandler.inputValue()"
+    (ionInput)="valueChange($event)"
+    debounce="200"
+  >
+    <ion-icon class="text-3xl mr-3!" slot="start" name="add"></ion-icon>
   </ion-input>
 </ion-item>
