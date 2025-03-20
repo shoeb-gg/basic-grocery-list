@@ -7,4 +7,5 @@ export class InputHandlerService {
   constructor() {}
 
   inputValue: WritableSignal<string> = signal<string>('');
+  inputFocus: WritableSignal<boolean> = signal<boolean>(false);
 }

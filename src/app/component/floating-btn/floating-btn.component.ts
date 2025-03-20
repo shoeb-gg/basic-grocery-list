@@ -1,13 +1,12 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { IonFab, IonFabButton, IonIcon } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
-import { add, checkmarkSharp, logIn } from 'ionicons/icons';
+import { add, checkmarkSharp } from 'ionicons/icons';
 
 import { InputHandlerService } from 'src/app/services/input-handler.service';
-
-import { take } from 'rxjs/internal/operators/take';
+import { ListStoreService } from 'src/app/services/list-store.service';
 
 @Component({
   selector: 'app-floating-btn',
@@ -15,15 +14,14 @@ import { take } from 'rxjs/internal/operators/take';
   styleUrls: ['./floating-btn.component.scss'],
   imports: [IonFab, IonFabButton, IonIcon],
 })
-export class FloatingBtnComponent implements OnInit, AfterViewInit {
+export class FloatingBtnComponent implements AfterViewInit {
   constructor(
     public readonly inputHandler: InputHandlerService,
+    private readonly listStore: ListStoreService,
     private readonly platform: Platform
   ) {
     addIcons({ add, checkmarkSharp });
   }
-
-  ngOnInit() {}
 
   ngAfterViewInit(): void {
     const input = document.querySelector('ion-fab');
@@ -39,5 +37,10 @@ export class FloatingBtnComponent implements OnInit, AfterViewInit {
     this.platform.keyboardDidHide.subscribe((event) => {
       input?.style.removeProperty('transform');
     });
+  }
+
+  addToList() {
+    this.listStore.addToList(this.inputHandler.inputValue());
+    this.inputHandler.inputValue.set('');
   }
 }
