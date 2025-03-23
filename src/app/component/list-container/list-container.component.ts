@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed } from '@angular/core';
 
 import {
   IonList,
   IonItem,
   IonCheckbox,
-  IonLabel,
+  IonInput,
 } from '@ionic/angular/standalone';
 
 import { InputContainerComponent } from '../input-container/input-container.component';
@@ -17,13 +17,23 @@ import { ListStoreService } from 'src/app/services/list-store.service';
   templateUrl: './list-container.component.html',
   styleUrls: ['./list-container.component.scss'],
   standalone: true,
-  imports: [IonLabel, IonList, IonItem, IonCheckbox, InputContainerComponent],
+  imports: [IonList, IonItem, IonCheckbox, InputContainerComponent, IonInput],
 })
-export class ListContainerComponent implements OnInit {
+export class ListContainerComponent {
   constructor(
     public readonly inputHandler: InputHandlerService,
     public readonly listStore: ListStoreService
   ) {}
 
-  ngOnInit() {}
+  valueChange(event: CustomEvent) {
+    this.inputHandler.inputValue.set(event.detail.value);
+  }
+
+  checkItem(id: number) {
+    this.listStore.originalList.update((currentItems) =>
+      currentItems.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  }
 }

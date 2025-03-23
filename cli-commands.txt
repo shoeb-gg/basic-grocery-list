@@ -1,0 +1,16 @@
+##To start Live Reloading App on Android:
+ionic capacitor run android -l --external
+
+##To start Live Reloading App on Web:
+ionic serve
+
+##To Open Build directory on Android Studio:
+ionic capacitor sync android
+ionic cap open android
+
+
+
+##For errors like "Error: listen EACCES: permission denied 127.0.0.1:8100"
+Ensure that PowerShell is running as an administrator.
+Use the following command to stop winnat: net stop winnat
+Use the following command to restart winnat: net start winnat
