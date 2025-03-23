@@ -40,7 +40,11 @@ export class FloatingBtnComponent implements AfterViewInit {
   }
 
   addToList() {
-    this.listStore.addToList(this.inputHandler.inputValue());
+    this.listStore.addToList({
+      id: this.listStore.originalList().length + 1,
+      itemName: this.inputHandler.inputValue(),
+      checked: false,
+    });
     this.inputHandler.inputValue.set('');
   }
 }

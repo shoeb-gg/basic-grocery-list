@@ -1,15 +1,48 @@
 <ion-list [inset]="true" mode="md" class="rounded-2xl!">
   <app-input-container></app-input-container>
 
-  @for (listitem of listStore.originalList(); track listitem) {
+  @for (listitem of listStore.originalList(); track listitem) { @if (!listitem.checked) {
   <ion-item>
-    <ion-checkbox class="text-lg" color="tertiary" labelPlacement="end" alignment="start">{{ listitem }}</ion-checkbox>
+    <ion-checkbox
+      class="text-lg"
+      color="tertiary"
+      labelPlacement="end"
+      alignment="start"
+      [checked]="listitem.checked"
+      (ionChange)="checkItem(listitem.id)"
+      >&nbsp;</ion-checkbox
+    >
+    <ion-input clearInput="true" enterkeyhint="done" mode="ios" [value]="listitem.itemName" debounce="200" (ionInput)="valueChange($event)">
+    </ion-input>
   </ion-item>
-  }
+
+  } } @for (listitem of listStore.originalList(); track listitem) { @if (listitem.checked) {
   <ion-item>
+    <ion-checkbox
+      class="text-lg"
+      color="tertiary"
+      labelPlacement="end"
+      alignment="start"
+      [checked]="listitem.checked"
+      (ionChange)="checkItem(listitem.id)"
+      >&nbsp;</ion-checkbox
+    >
+    <ion-input
+      clearInput="true"
+      enterkeyhint="done"
+      mode="ios"
+      [value]="listitem.itemName"
+      debounce="200"
+      (ionInput)="valueChange($event)"
+      class="line-through"
+    >
+    </ion-input>
+  </ion-item>
+  } }
+  <!-- <ion-item>
     <ion-label>{{ inputHandler.inputValue() }}</ion-label>
   </ion-item>
   <ion-item>
     <ion-label>{{ inputHandler.inputFocus() }}</ion-label>
-  </ion-item>
+  </ion-item> -->
 </ion-list>
