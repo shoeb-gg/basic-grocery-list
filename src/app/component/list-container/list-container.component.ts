@@ -32,6 +32,11 @@ export class ListContainerComponent implements AfterViewInit {
   }
 
   async valueChange(id: number, event: CustomEvent) {
+    if (event.detail.value === '') {
+      this.deleteItem(id);
+      return;
+    }
+
     this.listStore.originalList.update((currentItems) => {
       const item = currentItems.find((i) => i.id === id);
       if (item) {
@@ -47,6 +52,17 @@ export class ListContainerComponent implements AfterViewInit {
       const item = currentItems.find((i) => i.id === id);
       if (item) {
         item.checked = !item.checked;
+      }
+      return currentItems;
+    });
+    await this.listStore.syncList();
+  }
+
+  async deleteItem(id: number) {
+    this.listStore.originalList.update((currentItems) => {
+      const itemIndex = currentItems.findIndex((i) => i.id === id);
+      if (itemIndex !== -1) {
+        currentItems.splice(itemIndex, 1);
       }
       return currentItems;
     });

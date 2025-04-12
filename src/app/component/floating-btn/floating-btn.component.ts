@@ -17,7 +17,7 @@ import { ListStoreService } from 'src/app/services/list-store.service';
 export class FloatingBtnComponent implements AfterViewInit {
   constructor(
     public readonly inputHandler: InputHandlerService,
-    private readonly listStore: ListStoreService,
+    public readonly listStore: ListStoreService,
     private readonly platform: Platform
   ) {
     addIcons({ add, checkmarkSharp });
@@ -25,15 +25,6 @@ export class FloatingBtnComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.raiseFabBtn();
-  }
-
-  addToList() {
-    this.listStore.addToList({
-      id: this.listStore.originalList().length + 1,
-      itemName: this.inputHandler.inputValue(),
-      checked: false,
-    });
-    this.inputHandler.inputValue.set('');
   }
 
   raiseFabBtn() {
