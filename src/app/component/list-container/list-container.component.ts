@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component } from '@angular/core';
 
 import {
   IonList,
@@ -25,15 +25,23 @@ export class ListContainerComponent {
     public readonly listStore: ListStoreService
   ) {}
 
-  valueChange(event: CustomEvent) {
-    this.inputHandler.inputValue.set(event.detail.value);
+  valueChange(id: number, event: CustomEvent) {
+    this.listStore.originalList.update((currentItems) => {
+      const item = currentItems.find((i) => i.id === id);
+      if (item) {
+        item.itemName = event.detail.value;
+      }
+      return currentItems;
+    });
   }
 
   checkItem(id: number) {
-    this.listStore.originalList.update((currentItems) =>
-      currentItems.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
+    this.listStore.originalList.update((currentItems) => {
+      const item = currentItems.find((i) => i.id === id);
+      if (item) {
+        item.checked = !item.checked;
+      }
+      return currentItems;
+    });
   }
 }

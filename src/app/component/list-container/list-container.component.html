@@ -1,4 +1,4 @@
-<ion-list [inset]="true" mode="md" class="rounded-2xl!">
+<ion-list [inset]="true" mode="md" class="rounded-2xl! mb-20!">
   <app-input-container></app-input-container>
 
   @for (listitem of listStore.originalList(); track listitem) { @if (!listitem.checked) {
@@ -12,7 +12,14 @@
       (ionChange)="checkItem(listitem.id)"
       >&nbsp;</ion-checkbox
     >
-    <ion-input clearInput="true" enterkeyhint="done" mode="ios" [value]="listitem.itemName" debounce="200" (ionInput)="valueChange($event)">
+    <ion-input
+      clearInput="true"
+      enterkeyhint="done"
+      mode="ios"
+      [value]="listitem.itemName"
+      debounce="200"
+      (ionInput)="valueChange(listitem.id, $event)"
+    >
     </ion-input>
   </ion-item>
 
@@ -33,7 +40,7 @@
       mode="ios"
       [value]="listitem.itemName"
       debounce="200"
-      (ionInput)="valueChange($event)"
+      (ionInput)="valueChange(listitem.id, $event)"
       class="line-through"
     >
     </ion-input>
