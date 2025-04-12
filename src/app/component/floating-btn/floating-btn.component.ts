@@ -24,6 +24,19 @@ export class FloatingBtnComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.raiseFabBtn();
+  }
+
+  addToList() {
+    this.listStore.addToList({
+      id: this.listStore.originalList().length + 1,
+      itemName: this.inputHandler.inputValue(),
+      checked: false,
+    });
+    this.inputHandler.inputValue.set('');
+  }
+
+  raiseFabBtn() {
     const input = document.querySelector('ion-fab');
 
     this.platform.keyboardDidShow.subscribe((event: any) => {
@@ -37,14 +50,5 @@ export class FloatingBtnComponent implements AfterViewInit {
     this.platform.keyboardDidHide.subscribe((event) => {
       input?.style.removeProperty('transform');
     });
-  }
-
-  addToList() {
-    this.listStore.addToList({
-      id: this.listStore.originalList().length + 1,
-      itemName: this.inputHandler.inputValue(),
-      checked: false,
-    });
-    this.inputHandler.inputValue.set('');
   }
 }
