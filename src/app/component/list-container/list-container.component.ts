@@ -31,7 +31,7 @@ export class ListContainerComponent implements AfterViewInit {
     this.setListBottomMargin();
   }
 
-  valueChange(id: number, event: CustomEvent) {
+  async valueChange(id: number, event: CustomEvent) {
     this.listStore.originalList.update((currentItems) => {
       const item = currentItems.find((i) => i.id === id);
       if (item) {
@@ -39,9 +39,10 @@ export class ListContainerComponent implements AfterViewInit {
       }
       return currentItems;
     });
+    await this.listStore.syncList();
   }
 
-  checkItem(id: number) {
+  async checkItem(id: number) {
     this.listStore.originalList.update((currentItems) => {
       const item = currentItems.find((i) => i.id === id);
       if (item) {
@@ -49,6 +50,7 @@ export class ListContainerComponent implements AfterViewInit {
       }
       return currentItems;
     });
+    await this.listStore.syncList();
   }
 
   setListBottomMargin() {

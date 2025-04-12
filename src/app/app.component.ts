@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-// import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import {
   IonApp,
   IonHeader,
@@ -10,6 +9,9 @@ import {
 
 import { ListContainerComponent } from './component/list-container/list-container.component';
 import { FloatingBtnComponent } from './component/floating-btn/floating-btn.component';
+
+import { StorageService } from './services/storage.service';
+import { ListStoreService } from './services/list-store.service';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +27,16 @@ import { FloatingBtnComponent } from './component/floating-btn/floating-btn.comp
     FloatingBtnComponent,
   ],
 })
-export class AppComponent {
-  constructor() {}
+export class AppComponent implements OnInit {
+  constructor(
+    private readonly storage: StorageService,
+    private readonly listStore: ListStoreService
+  ) {}
+
+  async ngOnInit() {
+    await this.storage.init();
+    await this.storage.get('list').then((list) => {
+      this.listStore.originalList.set(list || []);
+    });
+  }
 }
