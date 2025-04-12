@@ -5,6 +5,7 @@ import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 
 import { InputHandlerService } from 'src/app/services/input-handler.service';
+import { ListStoreService } from 'src/app/services/list-store.service';
 
 @Component({
   selector: 'app-input-container',
@@ -15,7 +16,10 @@ import { InputHandlerService } from 'src/app/services/input-handler.service';
 export class InputContainerComponent {
   @ViewChild('THE_INPUT') thisInput!: IonInput;
 
-  constructor(public readonly inputHandler: InputHandlerService) {
+  constructor(
+    public readonly inputHandler: InputHandlerService,
+    public readonly listStore: ListStoreService
+  ) {
     addIcons({ add });
   }
 
