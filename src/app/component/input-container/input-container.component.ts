@@ -1,4 +1,4 @@
-import { Component, computed, ViewChild } from '@angular/core';
+import { Component, effect, ViewChild } from '@angular/core';
 import { IonInput, IonItem, IonIcon } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
@@ -14,13 +14,19 @@ import { ListStoreService } from 'src/app/services/list-store.service';
   imports: [IonInput, IonItem, IonIcon],
 })
 export class InputContainerComponent {
-  @ViewChild('THE_INPUT') thisInput!: IonInput;
+  @ViewChild('newItemInput') newItemInput!: IonInput;
 
   constructor(
     public readonly inputHandler: InputHandlerService,
     public readonly listStore: ListStoreService
   ) {
     addIcons({ add });
+
+    effect(() => {
+      if (this.inputHandler.inputFocus()) {
+        this.newItemInput.setFocus();
+      }
+    });
   }
 
   valueChange(event: CustomEvent) {
