@@ -20,19 +20,18 @@ export class ListStoreService {
   maxId: WritableSignal<number> = signal<number>(0);
 
   addToList() {
-    this.originalList.update((value) => [
-      {
-        id: this.maxId() + 1,
-        itemName: this.inputHandler.inputValue(),
-        checked: false,
-      },
-      ...value,
-    ]);
+    let newItem: ListItem = {
+      id: this.maxId() + 1,
+      itemName: this.inputHandler.inputValue(),
+      checked: false,
+    };
+
+    this.originalList.update((value) => [newItem, ...value]);
+    this.setUpLists();
     this.inputHandler.inputValue.set('');
     this.maxId.update((value) => value + 1);
 
     this.storage.set('list', this.originalList());
-    console.log(this.originalList());
   }
 
   async syncList() {
@@ -48,12 +47,14 @@ export class ListStoreService {
   }
 
   setUpLists() {
+    console.time('setUpLists');
     this.checkedList.set(
       this.originalList().filter((item) => item.checked === true)
     );
     this.unCheckedList.set(
       this.originalList().filter((item) => item.checked === false)
     );
+    console.timeEnd('setUpLists');
   }
 
   updateLists(id: number) {
