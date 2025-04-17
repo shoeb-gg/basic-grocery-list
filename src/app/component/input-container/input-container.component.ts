@@ -22,6 +22,14 @@ export class InputContainerComponent {
   ) {
     addIcons({ add });
 
+    this.listenInput();
+  }
+
+  valueChange(event: CustomEvent) {
+    this.inputHandler.inputValue.set(event.detail.value);
+  }
+
+  listenInput() {
     effect(() => {
       if (this.inputHandler.inputFocus()) {
         this.newItemInput.setFocus();
@@ -29,7 +37,7 @@ export class InputContainerComponent {
     });
   }
 
-  valueChange(event: CustomEvent) {
-    this.inputHandler.inputValue.set(event.detail.value);
+  unfocusInput() {
+    this.inputHandler.inputFocus.set(false);
   }
 }

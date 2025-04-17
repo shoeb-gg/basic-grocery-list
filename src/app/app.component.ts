@@ -14,7 +14,6 @@ import { FloatingBtnComponent } from './component/floating-btn/floating-btn.comp
 
 import { StorageService } from './services/storage.service';
 import { ListStoreService } from './services/list-store.service';
-import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -39,7 +38,7 @@ export class AppComponent implements OnInit {
   ) {
     this.platform.backButton.subscribeWithPriority(1, () => {
       if (!this.routerOutlet?.canGoBack()) {
-        App.exitApp();
+        App.minimizeApp();
       }
     });
   }
@@ -49,5 +48,7 @@ export class AppComponent implements OnInit {
     await this.storage.get('list').then((list) => {
       this.listStore.originalList.set(list || []);
     });
+    this.listStore.setUpLists();
+    this.listStore.setMaxId();
   }
 }
