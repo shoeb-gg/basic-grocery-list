@@ -7,6 +7,7 @@
     mode="ios"
     [value]="inputHandler.inputValue()"
     (ionInput)="valueChange($event)"
+    (ionBlur)="unfocusInput()"
     debounce="200"
     (keyup.enter)="listStore.addToList()"
   >

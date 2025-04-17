@@ -5,6 +5,9 @@ import {
   IonItem,
   IonCheckbox,
   IonInput,
+  IonReorder,
+  IonReorderGroup,
+  ItemReorderEventDetail,
 } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
 
@@ -12,13 +15,22 @@ import { InputContainerComponent } from '../input-container/input-container.comp
 
 import { InputHandlerService } from 'src/app/services/input-handler.service';
 import { ListStoreService } from 'src/app/services/list-store.service';
+import { ListItem } from 'src/models/ListItem';
 
 @Component({
   selector: 'app-list-container',
   templateUrl: './list-container.component.html',
   styleUrls: ['./list-container.component.scss'],
   standalone: true,
-  imports: [IonList, IonItem, IonCheckbox, InputContainerComponent, IonInput],
+  imports: [
+    IonList,
+    IonItem,
+    IonCheckbox,
+    InputContainerComponent,
+    IonInput,
+    IonReorder,
+    IonReorderGroup,
+  ],
 })
 export class ListContainerComponent implements AfterViewInit {
   constructor(
@@ -44,6 +56,8 @@ export class ListContainerComponent implements AfterViewInit {
       }
       return currentItems;
     });
+
+    this.listStore.updateLists(id);
     await this.listStore.syncList();
   }
 
@@ -55,6 +69,8 @@ export class ListContainerComponent implements AfterViewInit {
       }
       return currentItems;
     });
+
+    this.listStore.setUpLists();
     await this.listStore.syncList();
   }
 
@@ -66,7 +82,10 @@ export class ListContainerComponent implements AfterViewInit {
       }
       return currentItems;
     });
+    this.listStore.setUpLists();
+
     await this.listStore.syncList();
+    this.listStore.setMaxId();
   }
 
   setListBottomMargin() {
@@ -83,5 +102,25 @@ export class ListContainerComponent implements AfterViewInit {
     this.platform.keyboardDidHide.subscribe((event) => {
       input?.style.removeProperty('margin-bottom');
     });
+  }
+
+  async handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
+    let newUnCheckedList: ListItem[] = [];
+
+    this.listStore.unCheckedList.update((currentItems) => {
+      const updated = [...currentItems];
+      const [movedItem] = updated.splice(event.detail.from, 1);
+      updated.splice(event.detail.to, 0, movedItem);
+      newUnCheckedList = updated;
+      return updated;
+    });
+
+    this.listStore.originalList.update(() => {
+      return [...this.listStore.checkedList(), ...newUnCheckedList];
+    });
+
+    event.detail.complete();
+
+    await this.listStore.syncList();
   }
 }
