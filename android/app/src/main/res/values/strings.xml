@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">basic-grocery-list</string>
-    <string name="title_activity_main">basic-grocery-list</string>
-    <string name="package_name">basic.grocery.list</string>
-    <string name="custom_url_scheme">basic.grocery.list</string>
+    <string name="app_name">Quick List</string>
+    <string name="title_activity_main">quick-list</string>
+    <string name="package_name">quick.list</string>
+    <string name="custom_url_scheme">quick.list</string>
 </resources>

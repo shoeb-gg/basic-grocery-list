@@ -1,7 +1,13 @@
 <ion-app>
   <ion-header [translucent]="true">
     <ion-toolbar>
-      <ion-title class="text-center font-bold text-3xl pt-6 pb-2" color="tertiary">Default</ion-title>
+      <ion-title class="text-center font-bold text-3xl pt-6 pb-1" color="tertiary">Default</ion-title>
+      <!-- <ion-title class="text-center font-bold text-sm pt-6 pb-1" color="tertiary"> {{ origin }} </ion-title> -->
+      <ion-buttons slot="end" class="pt-6 pb-1 pr-2">
+        <ion-button (click)="auth.login()">
+          <ion-icon slot="icon-only" name="person"></ion-icon>
+        </ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 

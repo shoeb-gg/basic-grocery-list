@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'basic.grocery.list',
-  appName: 'Basic Grocery List',
+  appId: 'quick.list',
+  appName: 'Quick List',
   webDir: 'www',
 };
 

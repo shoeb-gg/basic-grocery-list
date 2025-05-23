@@ -1,5 +1,5 @@
 ##To start Live Reloading App on Android:
-ionic capacitor run android -l --external
+ionic capacitor run android -l --external --build
 
 ##To start Live Reloading App on Web:
 ionic serve
