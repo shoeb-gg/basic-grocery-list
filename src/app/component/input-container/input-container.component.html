@@ -1,8 +1,7 @@
 <ion-item>
   <ion-input
     #newItemInput
-    clearInput="true"
-    placeholder="Enter item name"
+    placeholder="Add an item..."
     enterkeyhint="done"
     mode="ios"
     [value]="inputHandler.inputValue()"
@@ -10,6 +9,7 @@
     (ionBlur)="unfocusInput()"
     debounce="200"
     (keyup.enter)="listStore.addToList()"
+    aria-label="Add new item"
   >
     <ion-icon class="text-3xl mr-4.5!" slot="start" name="add"></ion-icon>
   </ion-input>

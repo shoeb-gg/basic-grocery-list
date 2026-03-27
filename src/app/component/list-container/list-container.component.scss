@@ -61,6 +61,8 @@ ion-checkbox {
   --checkbox-background-checked: linear-gradient(135deg, #8b5cf6, #6366f1);
   --checkmark-color: #fff;
   -webkit-tap-highlight-color: transparent;
+  padding: 10px;
+  margin: -10px;
 }
 
 ion-checkbox::part(container) {
@@ -78,18 +80,60 @@ ion-input {
   font-size: 0.95rem !important;
   font-weight: 500;
   --color: #dde4f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 // Checked item strikethrough style
 .line-through {
-  --color: #404060;
-  opacity: 0.55;
+  --color: #6B7280;
+  opacity: 0.7;
+  text-decoration: line-through;
+  text-decoration-color: #6B7280;
 }
 
 // --- Reorder handle ---
 ion-reorder {
-  color: #2a2a42;
+  color: #4a4a6a;
   transition: color 0.2s;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// --- Swipe delete ---
+ion-item-option {
+  --background: #ef4444;
+  min-width: 70px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+// --- Empty state ---
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+
+  .empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #8892a8;
+    margin-bottom: 4px;
+  }
+
+  .empty-hint {
+    font-size: 0.85rem;
+    color: #5a6178;
+  }
 }
 
 // --- Completed divider ---

@@ -77,10 +77,15 @@ export class ListStoreService {
 
   // --- Item management (unchanged API) ---
 
-  addToList() {
-    let newItem: ListItem = {
+  addToList(): boolean {
+    const trimmed = this.inputHandler.inputValue().trim();
+    if (trimmed.length === 0) {
+      return false;
+    }
+
+    const newItem: ListItem = {
       id: this.maxId() + 1,
-      itemName: this.inputHandler.inputValue(),
+      itemName: trimmed,
       checked: false,
     };
 
@@ -90,6 +95,7 @@ export class ListStoreService {
     this.maxId.update((value) => value + 1);
 
     this.syncAllLists();
+    return true;
   }
 
   async syncList() {

@@ -1,15 +1,12 @@
-import { Component, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
 import {
-  IonSelect,
-  IonSelectOption,
   IonButton,
   IonIcon,
   IonAlert,
 } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
-import { createOutline, trashOutline, listOutline } from 'ionicons/icons';
+import { createOutline, trashOutline } from 'ionicons/icons';
 
 import { ListStoreService } from 'src/app/services/list-store.service';
 
@@ -18,18 +15,12 @@ import { ListStoreService } from 'src/app/services/list-store.service';
   templateUrl: './list-selector.component.html',
   styleUrls: ['./list-selector.component.scss'],
   imports: [
-    FormsModule,
-    IonSelect,
-    IonSelectOption,
     IonButton,
     IonIcon,
     IonAlert,
   ],
 })
 export class ListSelectorComponent {
-  @ViewChild(IonSelect) selectRef!: IonSelect;
-
-  readonly NEW_LIST_ID = -1;
 
   isRenameAlertOpen = false;
   isDeleteAlertOpen = false;
@@ -68,24 +59,20 @@ export class ListSelectorComponent {
   ];
 
   constructor(public readonly listStore: ListStoreService) {
-    addIcons({ createOutline, trashOutline, listOutline });
+    addIcons({ createOutline, trashOutline });
   }
 
-  openSelectDropdown() {
-    this.selectRef.open();
-  }
-
-  onListChange(event: CustomEvent) {
-    const id = event.detail.value;
-    if (id === this.NEW_LIST_ID) {
-      // Reset select back to current list before opening alert
-      this.selectRef.value = this.listStore.activeListId();
-      this.openNewListAlert();
-      return;
-    }
+  switchTo(id: number) {
     if (id !== this.listStore.activeListId()) {
       this.listStore.switchList(id);
     }
+  }
+
+  get activeListName(): string {
+    const list = this.listStore.lists().find(
+      (l) => l.id === this.listStore.activeListId()
+    );
+    return list?.name || '';
   }
 
   openRenameAlert() {
@@ -125,6 +112,13 @@ export class ListSelectorComponent {
   }
 
   openNewListAlert() {
+    this.newListAlertInputs = [
+      {
+        name: 'name',
+        type: 'text' as const,
+        placeholder: 'e.g., Weekly Groceries',
+      },
+    ];
     this.isNewListAlertOpen = true;
   }
 

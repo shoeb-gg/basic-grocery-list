@@ -7,9 +7,16 @@ import {
   IonInput,
   IonReorder,
   IonReorderGroup,
+  IonItemSliding,
+  IonItemOptions,
+  IonItemOption,
+  IonIcon,
   ItemReorderEventDetail,
 } from '@ionic/angular/standalone';
-import { Platform } from '@ionic/angular';
+import { Platform, ToastController } from '@ionic/angular';
+
+import { addIcons } from 'ionicons';
+import { trashOutline } from 'ionicons/icons';
 
 import { InputContainerComponent } from '../input-container/input-container.component';
 
@@ -30,14 +37,21 @@ import { ListItem } from 'src/models/ListItem';
     IonInput,
     IonReorder,
     IonReorderGroup,
+    IonItemSliding,
+    IonItemOptions,
+    IonItemOption,
+    IonIcon,
   ],
 })
 export class ListContainerComponent implements AfterViewInit {
   constructor(
     public readonly inputHandler: InputHandlerService,
     public readonly listStore: ListStoreService,
-    private readonly platform: Platform
-  ) {}
+    private readonly platform: Platform,
+    private readonly toastCtrl: ToastController
+  ) {
+    addIcons({ trashOutline });
+  }
 
   ngAfterViewInit(): void {
     this.setListBottomMargin();
@@ -72,6 +86,30 @@ export class ListContainerComponent implements AfterViewInit {
 
     this.listStore.setUpLists();
     await this.listStore.syncList();
+  }
+
+  async deleteItemWithUndo(item: ListItem) {
+    const deletedItem = { ...item };
+    await this.deleteItem(item.id);
+
+    const toast = await this.toastCtrl.create({
+      message: `"${deletedItem.itemName}" deleted`,
+      duration: 5000,
+      position: 'bottom',
+      cssClass: 'undo-toast',
+      buttons: [
+        {
+          text: 'UNDO',
+          role: 'cancel',
+          handler: () => {
+            this.listStore.originalList.update((items) => [deletedItem, ...items]);
+            this.listStore.setUpLists();
+            this.listStore.syncList();
+          },
+        },
+      ],
+    });
+    await toast.present();
   }
 
   async deleteItem(id: number) {

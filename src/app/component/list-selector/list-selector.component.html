@@ -1,27 +1,28 @@
-<div class="list-selector">
-  <ion-button fill="solid" size="small" class="swap-btn" (click)="openSelectDropdown()">
-    <ion-icon slot="icon-only" name="list-outline" color="tertiary"></ion-icon>
-  </ion-button>
+<!-- Chip bar for list switching -->
+<div class="chip-bar">
+  @for (list of listStore.lists(); track list.id) {
+    <button
+      class="chip"
+      [class.active]="list.id === listStore.activeListId()"
+      (click)="switchTo(list.id)"
+      [attr.aria-label]="'Switch to ' + list.name"
+    >
+      {{ list.name }}
+    </button>
+  }
+  <button class="chip add-chip" (click)="openNewListAlert()" aria-label="Create new list">+</button>
+</div>
 
-  <ion-select
-    [value]="listStore.activeListId()"
-    (ionChange)="onListChange($event)"
-    interface="action-sheet"
-    class="list-dropdown"
-  >
-    @for (list of listStore.lists(); track list.id) {
-      <ion-select-option [value]="list.id">{{ list.name }}</ion-select-option>
-    }
-    <ion-select-option [value]="NEW_LIST_ID">+ New List</ion-select-option>
-  </ion-select>
-
+<!-- Active list header -->
+<div class="list-header">
+  <h2 class="list-title">{{ activeListName }}</h2>
   <div class="actions">
-    <ion-button fill="solid" size="small" (click)="openRenameAlert()">
+    <ion-button fill="solid" size="small" (click)="openRenameAlert()" aria-label="Rename list">
       <ion-icon slot="icon-only" name="create-outline" color="tertiary"></ion-icon>
     </ion-button>
 
     @if (canDelete) {
-      <ion-button fill="solid" size="small" class="danger-btn" (click)="openDeleteAlert()">
+      <ion-button fill="solid" size="small" class="danger-btn" (click)="openDeleteAlert()" aria-label="Delete list">
         <ion-icon slot="icon-only" name="trash-outline" color="danger"></ion-icon>
       </ion-button>
     }
