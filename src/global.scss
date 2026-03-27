@@ -3,38 +3,275 @@
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-@import "@ionic/angular/css/palettes/dark.system.css";
 
-// /* Basic CSS for apps built with Ionic */
-// @import "@ionic/angular/css/normalize.css";
-// @import "@ionic/angular/css/structure.css";
-// @import "@ionic/angular/css/typography.css";
-// @import "@ionic/angular/css/display.css";
+/* Ionic theme variables */
+@import "theme/variables.scss";
 
-// /* Optional CSS utils that can be commented out */
-// @import "@ionic/angular/css/padding.css";
-// @import "@ionic/angular/css/float-elements.css";
-// @import "@ionic/angular/css/text-alignment.css";
-// @import "@ionic/angular/css/text-transformation.css";
-// @import "@ionic/angular/css/flex-utils.css";
+* {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-// /**
-//  * Ionic Dark Mode
-//  * -----------------------------------------------------
-//  * For more info, please see:
-//  * https://ionicframework.com/docs/theming/dark-mode
-//  */
+/* --- Ambient background blobs --- */
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
 
-// /* @import "@ionic/angular/css/palettes/dark.always.css"; */
-// /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-// @import '@ionic/angular/css/palettes/dark.system.css';
+.bg-glow .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+
+.bg-glow .blob-1 {
+  width: 280px;
+  height: 280px;
+  background: rgba(139, 92, 246, 0.18);
+  top: -60px;
+  left: -40px;
+  animation: blobMove1 12s ease-in-out infinite;
+}
+
+.bg-glow .blob-2 {
+  width: 200px;
+  height: 200px;
+  background: rgba(59, 130, 246, 0.14);
+  top: 30%;
+  right: -60px;
+  animation: blobMove2 10s ease-in-out infinite;
+}
+
+.bg-glow .blob-3 {
+  width: 240px;
+  height: 240px;
+  background: rgba(236, 72, 153, 0.1);
+  bottom: -40px;
+  left: 20%;
+  animation: blobMove3 14s ease-in-out infinite;
+}
+
+@keyframes blobMove1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, 30px) scale(1.15); }
+  66% { transform: translate(-20px, 15px) scale(0.9); }
+}
+
+@keyframes blobMove2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 20px) scale(1.1); }
+}
+
+@keyframes blobMove3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -20px) scale(1.1); }
+  66% { transform: translate(-30px, -10px) scale(0.95); }
+}
+
+/* --- Global animation keyframes --- */
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes contentFade {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes itemSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   Ionic Overlay Styles (popover, alert)
+   ============================================= */
+
+/* --- Action Sheet (list selector dropdown) --- */
+ion-action-sheet {
+  --backdrop-opacity: 0.5;
+  --background: #1a1a2e;
+  --color: #e2e8f0;
+
+  .action-sheet-wrapper {
+    .action-sheet-container {
+      padding: 0 12px 12px;
+    }
+
+    .action-sheet-group {
+      background: #1a1a2e !important;
+      border-radius: 16px !important;
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+
+      .action-sheet-title {
+        color: #8892a8 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.8rem !important;
+        font-weight: 600;
+        background: transparent !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 14px 16px !important;
+      }
+
+      button.action-sheet-button {
+        background: transparent !important;
+        color: #c4cede !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.95rem !important;
+        font-weight: 500;
+        min-height: 50px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        transition: background 0.2s;
+
+        &:active {
+          background: rgba(139, 92, 246, 0.1) !important;
+        }
+
+        &.action-sheet-selected {
+          color: #a78bfa !important;
+          font-weight: 600;
+          background: rgba(139, 92, 246, 0.08) !important;
+        }
+
+        .action-sheet-button-inner {
+          justify-content: flex-start !important;
+        }
+      }
+    }
+
+    // Cancel group
+    .action-sheet-group-cancel {
+      margin-top: 8px;
+
+      button.action-sheet-button {
+        color: #8892a8 !important;
+        font-weight: 600;
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+/* --- Alert Dialog --- */
+ion-alert {
+  --backdrop-opacity: 0.5;
+
+  .alert-wrapper {
+    background: #1a1a2e !important;
+    border: 1px solid rgba(139, 92, 246, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset !important;
+    padding: 8px !important;
+    max-width: 320px;
+  }
+
+  .alert-head {
+    padding: 16px 20px 8px !important;
+
+    .alert-title {
+      color: #e2e8f0 !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 1.15rem !important;
+      font-weight: 700 !important;
+    }
+  }
+
+  .alert-message {
+    color: #8892a8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
+    padding: 0 20px 8px !important;
+    line-height: 1.5;
+  }
+
+  // Input inside alert
+  .alert-input-group {
+    padding: 4px 20px 12px !important;
+
+    .alert-input {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 12px !important;
+      color: #e2e8f0 !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 0.95rem !important;
+      padding: 12px 14px !important;
+      caret-color: #8b5cf6;
+      transition: border-color 0.3s;
+
+      &:focus {
+        border-color: rgba(139, 92, 246, 0.4) !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+      }
+
+      &::placeholder {
+        color: #4a4a6a !important;
+      }
+    }
+  }
+
+  // Alert buttons
+  .alert-button-group {
+    padding: 4px 12px 12px !important;
+    gap: 8px;
+
+    .alert-button {
+      border-radius: 12px !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.02em;
+      min-height: 42px;
+      padding: 0 16px !important;
+      margin: 0 !important;
+      text-transform: none !important;
+      transition: all 0.2s;
+
+      // Cancel button
+      &:first-child {
+        color: #8892a8 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+
+        &:active {
+          background: rgba(255, 255, 255, 0.1) !important;
+        }
+      }
+
+      // Confirm/action button
+      &:last-child {
+        color: #fff !important;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+
+        &:active {
+          opacity: 0.8;
+        }
+      }
+
+      // Destructive button (delete)
+      &.alert-button-role-destructive {
+        color: #fff !important;
+        background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+
+        &:active {
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+}

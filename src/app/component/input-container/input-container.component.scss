@@ -1,3 +1,39 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+ion-item {
+  --border-color: rgba(255, 255, 255, 0.05);
+}
+
+// Focus underline
+:host::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6, #ec4899);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  border-radius: 2px;
+  z-index: 2;
+}
+
+:host-context(.input-focused)::after,
+:host(.input-focused)::after {
+  width: 100%;
+}
+
 ion-input {
-  font-size: 18px;
+  font-size: 0.95rem !important;
+  font-weight: 500;
+  --placeholder-color: #3f3f5c;
+
+  ion-icon {
+    color: #8b5cf6 !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }

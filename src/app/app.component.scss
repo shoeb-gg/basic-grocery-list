@@ -1,5 +1,34 @@
-::ng-deep {
-  // ion-title {
-  //   @apply flex justify-center;
-  // }
+ion-content {
+  --background: transparent;
+  --padding-top: 16px;
+  animation: contentFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.selector-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 12px 14px;
+  margin: 0 16px 12px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    padding: 1px;
+    background: linear-gradient(
+      160deg,
+      rgba(139, 92, 246, 0.2),
+      transparent 40%,
+      transparent 70%,
+      rgba(59, 130, 246, 0.12)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 }

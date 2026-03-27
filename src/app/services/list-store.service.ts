@@ -1,6 +1,6 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 
-import { ListItem } from 'src/models/ListItem';
+import { ListItem, GroceryList } from 'src/models/ListItem';
 
 import { StorageService } from './storage.service';
 import { InputHandlerService } from './input-handler.service';
@@ -14,10 +14,68 @@ export class ListStoreService {
     public readonly inputHandler: InputHandlerService
   ) {}
 
+  lists: WritableSignal<GroceryList[]> = signal<GroceryList[]>([]);
+  activeListId: WritableSignal<number> = signal<number>(1);
+
   originalList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   checkedList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   unCheckedList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   maxId: WritableSignal<number> = signal<number>(0);
+
+  // --- Multi-list management ---
+
+  createList(name: string): GroceryList {
+    const maxListId = this.lists().reduce((max, l) => Math.max(max, l.id), 0);
+    const newList: GroceryList = { id: maxListId + 1, name, items: [] };
+    this.lists.update((lists) => [...lists, newList]);
+    this.switchList(newList.id);
+    this.syncAllLists();
+    return newList;
+  }
+
+  renameList(id: number, name: string) {
+    this.lists.update((lists) =>
+      lists.map((l) => (l.id === id ? { ...l, name } : l))
+    );
+    this.syncAllLists();
+  }
+
+  deleteList(id: number) {
+    this.lists.update((lists) => lists.filter((l) => l.id !== id));
+    if (this.activeListId() === id) {
+      const remaining = this.lists();
+      if (remaining.length > 0) {
+        this.switchList(remaining[0].id);
+      }
+    }
+    this.syncAllLists();
+  }
+
+  switchList(id: number) {
+    this.saveCurrentListItems();
+    this.activeListId.set(id);
+    const list = this.lists().find((l) => l.id === id);
+    this.originalList.set(list?.items || []);
+    this.setUpLists();
+    this.setMaxId();
+    this.storage.set('active_list_id', id);
+  }
+
+  private saveCurrentListItems() {
+    const currentId = this.activeListId();
+    const currentItems = this.originalList();
+    this.lists.update((lists) =>
+      lists.map((l) => (l.id === currentId ? { ...l, items: currentItems } : l))
+    );
+  }
+
+  async syncAllLists() {
+    this.saveCurrentListItems();
+    await this.storage.set('grocery_lists', this.lists());
+    await this.storage.set('active_list_id', this.activeListId());
+  }
+
+  // --- Item management (unchanged API) ---
 
   addToList() {
     let newItem: ListItem = {
@@ -31,11 +89,11 @@ export class ListStoreService {
     this.inputHandler.inputValue.set('');
     this.maxId.update((value) => value + 1);
 
-    this.storage.set('list', this.originalList());
+    this.syncAllLists();
   }
 
   async syncList() {
-    await this.storage.set('list', this.originalList());
+    await this.syncAllLists();
   }
 
   setMaxId() {

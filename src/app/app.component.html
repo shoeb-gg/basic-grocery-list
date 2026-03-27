@@ -1,11 +1,14 @@
 <ion-app>
-  <ion-header [translucent]="true">
-    <ion-toolbar>
-      <ion-title class="text-center font-bold text-3xl pt-6 pb-2" color="tertiary">Default</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="bg-glow">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
 
-  <ion-content [fullscreen]="false" class="ion-padding">
+  <ion-content [fullscreen]="true" class="ion-padding">
+    <div class="selector-card">
+      <app-list-selector></app-list-selector>
+    </div>
     <app-list-container></app-list-container>
   </ion-content>
 

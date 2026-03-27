@@ -1,5 +1,66 @@
 ion-fab {
   margin-top: var(--ion-safe-area-top, 0);
-
   margin-bottom: var(--ion-safe-area-bottom, 0);
+}
+
+ion-fab-button {
+  --border-radius: 18px;
+  width: 58px;
+  height: 58px;
+  --box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+  animation: fabEntry 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+  position: relative;
+
+  &::part(native) {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6);
+    background-size: 150% 150%;
+    animation: fabGradient 3s ease-in-out infinite;
+  }
+
+  // Glow effect behind FAB
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    z-index: -1;
+    opacity: 0.35;
+    filter: blur(14px);
+    animation: fabPulse 2.5s ease-in-out infinite;
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+// Success state (when input has text)
+ion-fab-button[color="success"] {
+  &::part(native) {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    background-size: 100% 100%;
+    animation: none;
+  }
+
+  &::after {
+    background: #22c55e;
+  }
+}
+
+@keyframes fabEntry {
+  from { opacity: 0; transform: scale(0.4) rotate(-90deg); }
+  to { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes fabGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes fabPulse {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
 }

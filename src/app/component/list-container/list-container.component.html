@@ -27,6 +27,10 @@
     }
   </ion-reorder-group>
 
+  @if (listStore.checkedList().length > 0 && listStore.unCheckedList().length > 0) {
+    <div class="completed-divider"><span>completed</span></div>
+  }
+
   @for (listitem of listStore.checkedList(); track listitem.id) {
   <ion-item>
     <ion-checkbox
