@@ -16,7 +16,7 @@ import {
 import { Platform, ToastController } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
-import { trashOutline } from 'ionicons/icons';
+import { trashOutline, closeCircle } from 'ionicons/icons';
 
 import { InputContainerComponent } from '../input-container/input-container.component';
 
@@ -50,7 +50,7 @@ export class ListContainerComponent implements AfterViewInit {
     private readonly platform: Platform,
     private readonly toastCtrl: ToastController
   ) {
-    addIcons({ trashOutline });
+    addIcons({ trashOutline, closeCircle });
   }
 
   ngAfterViewInit(): void {

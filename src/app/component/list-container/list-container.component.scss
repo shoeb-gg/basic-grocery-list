@@ -92,9 +92,23 @@ ion-input {
   text-decoration-color: #6B7280;
 }
 
+// --- Delete icon ---
+.delete-icon {
+  color: #7c6b7a;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 10px 4px;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    color: #f87171;
+  }
+}
+
 // --- Reorder handle ---
 ion-reorder {
-  color: #4a4a6a;
+  color: #94a3b8;
   transition: color 0.2s;
   padding: 10px;
   min-width: 44px;

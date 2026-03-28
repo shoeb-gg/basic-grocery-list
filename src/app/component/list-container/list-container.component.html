@@ -30,6 +30,7 @@
         class="line-through"
       >
       </ion-input>
+      <ion-icon name="close-circle" slot="end" class="delete-icon" (click)="deleteItemWithUndo(listitem)"></ion-icon>
     </ion-item>
     <ion-item-options side="end">
       <ion-item-option color="danger" (click)="deleteItemWithUndo(listitem)">
@@ -65,6 +66,7 @@
           (ionInput)="valueChange(listitem.id, $event)"
         >
         </ion-input>
+        <ion-icon name="close-circle" slot="end" class="delete-icon" (click)="deleteItemWithUndo(listitem)"></ion-icon>
         <ion-reorder slot="end" aria-label="Reorder"></ion-reorder>
       </ion-item>
       <ion-item-options side="end">
