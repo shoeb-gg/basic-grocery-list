@@ -184,6 +184,8 @@ ion-action-sheet {
 /* --- Alert Dialog --- */
 ion-alert {
   --backdrop-opacity: 0.5;
+  align-items: flex-end !important;
+  padding-bottom: 120px;
 
   .alert-wrapper {
     background: #1a1a2e !important;

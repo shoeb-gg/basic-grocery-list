@@ -1,4 +1,5 @@
 <!-- Chip bar for list switching -->
+<div class="chip-bar-wrapper">
 <div class="chip-bar">
   <button class="chip add-chip" (click)="openNewListAlert()" aria-label="Create new list">+</button>
   @for (list of listStore.lists(); track list.id) {
@@ -11,6 +12,7 @@
       {{ list.name }}
     </button>
   }
+</div>
 </div>
 
 <!-- Active list header -->

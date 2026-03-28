@@ -82,36 +82,28 @@ ion-input {
   --color: #dde4f0;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  &.has-focus {
+    --background: rgba(139, 92, 246, 0.06);
+    border-radius: 8px;
+    --highlight-color-focused: #8b5cf6;
+  }
 }
 
 // Checked item strikethrough style
 .line-through {
-  --color: #6B7280;
-  opacity: 0.7;
+  --color: #8C93A0;
+  opacity: 0.75;
   text-decoration: line-through;
-  text-decoration-color: #6B7280;
-}
-
-// --- Delete icon ---
-.delete-icon {
-  color: #7c6b7a;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 10px 4px;
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-
-  &:active {
-    color: #f87171;
-  }
+  text-decoration-color: #8C93A0;
 }
 
 // --- Reorder handle ---
 ion-reorder {
   color: #94a3b8;
   transition: color 0.2s;
-  padding: 10px;
-  min-width: 44px;
+  padding: 10px 6px;
+  min-width: 36px;
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -120,7 +112,10 @@ ion-reorder {
 
 // --- Swipe delete ---
 ion-item-option {
-  --background: #ef4444;
+  --background: #2a1525 !important;
+  --color: #c45050 !important;
+  --ion-color-danger: #2a1525 !important;
+  --ion-color-danger-contrast: #c45050 !important;
   min-width: 70px;
   font-family: 'Inter', sans-serif;
   font-weight: 600;

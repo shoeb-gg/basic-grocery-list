@@ -97,6 +97,7 @@ export class ListStoreService {
     this.maxId.update((value) => value + 1);
 
     this.syncAllLists();
+    this.onListSwitch?.();
     return true;
   }
 
