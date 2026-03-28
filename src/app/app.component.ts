@@ -1,4 +1,4 @@
-import { Component, OnInit, Optional } from '@angular/core';
+import { Component, OnInit, Optional, ViewChild, AfterViewInit } from '@angular/core';
 import {
   IonApp,
   IonContent,
@@ -7,7 +7,6 @@ import { Platform, IonRouterOutlet } from '@ionic/angular';
 import { App } from '@capacitor/app';
 
 import { ListContainerComponent } from './component/list-container/list-container.component';
-import { FloatingBtnComponent } from './component/floating-btn/floating-btn.component';
 import { ListSelectorComponent } from './component/list-selector/list-selector.component';
 
 import { StorageService } from './services/storage.service';
@@ -22,11 +21,12 @@ import { GroceryList } from 'src/models/ListItem';
     IonApp,
     IonContent,
     ListContainerComponent,
-    FloatingBtnComponent,
     ListSelectorComponent,
   ],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
+  @ViewChild(IonContent) content!: IonContent;
+
   constructor(
     private readonly storage: StorageService,
     private readonly listStore: ListStoreService,
@@ -68,5 +68,17 @@ export class AppComponent implements OnInit {
 
     this.listStore.setUpLists();
     this.listStore.setMaxId();
+
+    setTimeout(() => this.scrollToBottom(), 100);
+  }
+
+  ngAfterViewInit() {
+    this.listStore.onListSwitch = () => {
+      setTimeout(() => this.scrollToBottom(), 50);
+    };
+  }
+
+  scrollToBottom() {
+    this.content?.scrollToBottom(300);
   }
 }

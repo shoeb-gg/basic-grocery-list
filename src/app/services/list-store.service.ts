@@ -16,6 +16,7 @@ export class ListStoreService {
 
   lists: WritableSignal<GroceryList[]> = signal<GroceryList[]>([]);
   activeListId: WritableSignal<number> = signal<number>(1);
+  onListSwitch: (() => void) | null = null;
 
   originalList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   checkedList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
@@ -59,6 +60,7 @@ export class ListStoreService {
     this.setUpLists();
     this.setMaxId();
     this.storage.set('active_list_id', id);
+    this.onListSwitch?.();
   }
 
   private saveCurrentListItems() {
@@ -89,7 +91,7 @@ export class ListStoreService {
       checked: false,
     };
 
-    this.originalList.update((value) => [newItem, ...value]);
+    this.originalList.update((value) => [...value, newItem]);
     this.setUpLists();
     this.inputHandler.inputValue.set('');
     this.maxId.update((value) => value + 1);

@@ -1,5 +1,48 @@
 <ion-list [inset]="true" mode="md" class="rounded-2xl!">
-  <app-input-container></app-input-container>
+
+  @if (listStore.unCheckedList().length === 0 && listStore.checkedList().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🛒</div>
+      <p class="empty-title">Your list is empty</p>
+      <p class="empty-hint">Add your first item below!</p>
+    </div>
+  }
+
+  @for (listitem of listStore.checkedList(); track listitem.id) {
+  <ion-item-sliding>
+    <ion-item>
+      <ion-checkbox
+        class="text-lg"
+        color="tertiary"
+        labelPlacement="end"
+        alignment="start"
+        [checked]="listitem.checked"
+        (ionChange)="checkItem(listitem.id)"
+        [attr.aria-label]="'Mark ' + listitem.itemName + ' as incomplete'"
+        >&nbsp;</ion-checkbox
+      >
+      <ion-input
+        enterkeyhint="done"
+        mode="ios"
+        [value]="listitem.itemName"
+        debounce="200"
+        (ionInput)="valueChange(listitem.id, $event)"
+        class="line-through"
+      >
+      </ion-input>
+    </ion-item>
+    <ion-item-options side="end">
+      <ion-item-option color="danger" (click)="deleteItemWithUndo(listitem)">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-item-option>
+    </ion-item-options>
+  </ion-item-sliding>
+  }
+
+  @if (listStore.checkedList().length > 0 && listStore.unCheckedList().length > 0) {
+    <div class="completed-divider"><span>to do</span></div>
+  }
+
   <ion-reorder-group [disabled]="false" (ionItemReorder)="handleReorder($any($event))">
     @for (listitem of listStore.unCheckedList(); track listitem.id) {
     <ion-item-sliding>
@@ -11,7 +54,7 @@
           alignment="start"
           [checked]="listitem.checked"
           (ionChange)="checkItem(listitem.id)"
-          aria-label="Mark {{ listitem.itemName }} as complete"
+          [attr.aria-label]="'Mark ' + listitem.itemName + ' as complete'"
           >&nbsp;</ion-checkbox
         >
         <ion-input
@@ -34,48 +77,5 @@
     }
   </ion-reorder-group>
 
-  @if (listStore.checkedList().length > 0 && listStore.unCheckedList().length > 0) {
-    <div class="completed-divider"><span>completed</span></div>
-  }
-
-  @if (listStore.unCheckedList().length === 0 && listStore.checkedList().length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">🛒</div>
-      <p class="empty-title">Your list is empty</p>
-      <p class="empty-hint">Add your first item above!</p>
-    </div>
-  }
-
-  @for (listitem of listStore.checkedList(); track listitem.id) {
-  <ion-item-sliding>
-    <ion-item>
-      <ion-checkbox
-        class="text-lg"
-        color="tertiary"
-        labelPlacement="end"
-        alignment="start"
-        [checked]="listitem.checked"
-        (ionChange)="checkItem(listitem.id)"
-        aria-label="Mark {{ listitem.itemName }} as incomplete"
-        >&nbsp;</ion-checkbox
-      >
-      <ion-input
-        enterkeyhint="done"
-        mode="ios"
-        [value]="listitem.itemName"
-        debounce="200"
-        (ionInput)="valueChange(listitem.id, $event)"
-        class="line-through"
-      >
-      </ion-input>
-    </ion-item>
-    <ion-item-options side="end">
-      <ion-item-option color="danger" (click)="deleteItemWithUndo(listitem)">
-        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-      </ion-item-option>
-    </ion-item-options>
-  </ion-item-sliding>
-  }
+  <app-input-container></app-input-container>
 </ion-list>
-
-<div class="mb-20"></div>

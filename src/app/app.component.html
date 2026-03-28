@@ -5,12 +5,13 @@
     <div class="blob blob-3"></div>
   </div>
 
-  <ion-content [fullscreen]="true" class="ion-padding">
-    <div class="selector-card">
-      <app-list-selector></app-list-selector>
+  <ion-content [fullscreen]="true" class="ion-padding" [scrollY]="true">
+    <div class="content-wrapper">
+      <app-list-container></app-list-container>
     </div>
-    <app-list-container></app-list-container>
   </ion-content>
 
-  <app-floating-btn></app-floating-btn>
+  <div class="selector-card">
+    <app-list-selector></app-list-selector>
+  </div>
 </ion-app>

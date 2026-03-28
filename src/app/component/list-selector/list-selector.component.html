@@ -1,5 +1,6 @@
 <!-- Chip bar for list switching -->
 <div class="chip-bar">
+  <button class="chip add-chip" (click)="openNewListAlert()" aria-label="Create new list">+</button>
   @for (list of listStore.lists(); track list.id) {
     <button
       class="chip"
@@ -10,23 +11,21 @@
       {{ list.name }}
     </button>
   }
-  <button class="chip add-chip" (click)="openNewListAlert()" aria-label="Create new list">+</button>
 </div>
 
 <!-- Active list header -->
 <div class="list-header">
-  <h2 class="list-title">{{ activeListName }}</h2>
   <div class="actions">
-    <ion-button fill="solid" size="small" (click)="openRenameAlert()" aria-label="Rename list">
-      <ion-icon slot="icon-only" name="create-outline" color="tertiary"></ion-icon>
-    </ion-button>
-
     @if (canDelete) {
       <ion-button fill="solid" size="small" class="danger-btn" (click)="openDeleteAlert()" aria-label="Delete list">
         <ion-icon slot="icon-only" name="trash-outline" color="danger"></ion-icon>
       </ion-button>
     }
+    <ion-button fill="solid" size="small" (click)="openRenameAlert()" aria-label="Rename list">
+      <ion-icon slot="icon-only" name="create-outline" color="tertiary"></ion-icon>
+    </ion-button>
   </div>
+  <h2 class="list-title">{{ activeListName }}</h2>
 </div>
 
 <!-- Rename Alert -->

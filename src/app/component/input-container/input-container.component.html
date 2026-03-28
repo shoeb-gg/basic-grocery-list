@@ -1,16 +1,21 @@
 <ion-item>
+  <ion-icon class="text-2xl mr-3!" slot="start" name="add" color="tertiary"></ion-icon>
   <ion-input
     #newItemInput
     placeholder="Add an item..."
-    enterkeyhint="done"
+    enterkeyhint="send"
     mode="ios"
     [value]="inputHandler.inputValue()"
     (ionInput)="valueChange($event)"
     (ionBlur)="unfocusInput()"
     debounce="200"
-    (keyup.enter)="listStore.addToList()"
+    (keyup.enter)="addAndBlur()"
     aria-label="Add new item"
   >
-    <ion-icon class="text-3xl mr-4.5!" slot="start" name="add"></ion-icon>
   </ion-input>
+  @if (inputHandler.inputValue().trim().length > 0) {
+    <ion-button slot="end" fill="clear" size="small" (click)="listStore.addToList()" aria-label="Add item">
+      <ion-icon slot="icon-only" name="arrow-up-circle" color="tertiary" class="text-3xl!"></ion-icon>
+    </ion-button>
+  }
 </ion-item>

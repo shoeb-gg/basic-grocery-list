@@ -54,7 +54,6 @@ export class ListContainerComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.setListBottomMargin();
   }
 
   async valueChange(id: number, event: CustomEvent) {
@@ -126,21 +125,6 @@ export class ListContainerComponent implements AfterViewInit {
     this.listStore.setMaxId();
   }
 
-  setListBottomMargin() {
-    const input = document.querySelector('ion-list');
-
-    this.platform.keyboardDidShow.subscribe((event: any) => {
-      input?.style.setProperty('transition', 'margin-bottom 0.1s ease-in');
-      input?.style.setProperty(
-        'margin-bottom',
-        `${event.keyboardHeight + 80}px`,
-        'important'
-      );
-    });
-    this.platform.keyboardDidHide.subscribe((event) => {
-      input?.style.removeProperty('margin-bottom');
-    });
-  }
 
   async handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
     let newUnCheckedList: ListItem[] = [];
