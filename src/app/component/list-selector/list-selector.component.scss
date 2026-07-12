@@ -37,7 +37,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
   color: #8892a8;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--app-font-family);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;

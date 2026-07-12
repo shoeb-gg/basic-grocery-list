@@ -21,7 +21,11 @@ bootstrapApplication(AppComponent, {
     provideZoneChangeDetection(),
     Storage,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideIonicAngular(),
+    // scrollAssist/scrollPadding off: the app owns keyboard scrolling itself
+    // (AppComponent) against the CDK virtual-scroll viewport, and Ionic's
+    // built-in assist fights that — it over-scrolls the focused input to the
+    // top of the viewport.
+    provideIonicAngular({ scrollAssist: false, scrollPadding: false }),
     provideRouter(routes, withPreloading(PreloadAllModules)),
   ],
 });

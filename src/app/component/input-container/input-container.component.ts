@@ -11,7 +11,7 @@ import { ListStoreService } from 'src/app/services/list-store.service';
   selector: 'app-input-container',
   templateUrl: './input-container.component.html',
   styleUrls: ['./input-container.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonInput, IonItem, IonIcon, IonButton],
 })
 export class InputContainerComponent {

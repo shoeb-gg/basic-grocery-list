@@ -6,13 +6,13 @@
     <div class="blob blob-3"></div>
   </div>
 
-  <ion-content [fullscreen]="true" class="ion-padding" [scrollY]="true">
+  <ion-content [fullscreen]="true" class="ion-padding" [scrollY]="false">
     <div class="content-wrapper">
       <app-list-container></app-list-container>
     </div>
   </ion-content>
 
-  <div class="selector-card" [class.keyboard-open]="keyboardOpen">
+  <div class="selector-card" [class.keyboard-open]="keyboardOpen()">
     <app-list-selector></app-list-selector>
   </div>
 </ion-app>

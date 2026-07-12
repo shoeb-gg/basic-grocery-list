@@ -18,10 +18,19 @@ export class ListStoreService {
   activeListId: WritableSignal<number> = signal<number>(1);
   onListSwitch: (() => void) | null = null;
 
+  // Scroll the virtual-scroll viewport to the very bottom, implemented by
+  // ListContainerComponent via the CDK viewport API (more reliable than
+  // scrollHeight on a freshly-rendered virtual list). ion-content itself no
+  // longer scrolls.
+  scrollToBottomFn: (() => void) | null = null;
+
   originalList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   checkedList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   unCheckedList: WritableSignal<ListItem[]> = signal<ListItem[]>([]);
   maxId: WritableSignal<number> = signal<number>(0);
+
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastPersistedActiveListId: number | null = null;
 
   // --- Multi-list management ---
 
@@ -29,8 +38,7 @@ export class ListStoreService {
     const maxListId = this.lists().reduce((max, l) => Math.max(max, l.id), 0);
     const newList: GroceryList = { id: maxListId + 1, name, items: [] };
     this.lists.update((lists) => [...lists, newList]);
-    this.switchList(newList.id);
-    this.syncAllLists();
+    this.switchList(newList.id); // persists via syncAllLists()
     return newList;
   }
 
@@ -59,7 +67,7 @@ export class ListStoreService {
     this.originalList.set(list?.items || []);
     this.setUpLists();
     this.setMaxId();
-    this.storage.set('active_list_id', id);
+    this.syncAllLists(); // persists grocery_lists + the changed active_list_id
     this.onListSwitch?.();
   }
 
@@ -71,10 +79,36 @@ export class ListStoreService {
     );
   }
 
+  // Immediate, awaitable persist. Writes the whole lists blob; active_list_id
+  // is only rewritten when it actually changed (it changes only in
+  // switchList), so item mutations no longer issue a redundant second write.
   async syncAllLists() {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = null;
+    }
     this.saveCurrentListItems();
     await this.storage.set('grocery_lists', this.lists());
-    await this.storage.set('active_list_id', this.activeListId());
+    const activeId = this.activeListId();
+    if (activeId !== this.lastPersistedActiveListId) {
+      await this.storage.set('active_list_id', activeId);
+      this.lastPersistedActiveListId = activeId;
+    }
+  }
+
+  // Debounced persist for high-frequency paths (per-keystroke item-name
+  // edits). The in-memory signal update stays instant so the UI never lags;
+  // this collapses a burst of keystrokes into a single IndexedDB write ~400ms
+  // after typing stops. Any immediate syncAllLists() (blur, add, check,
+  // delete, switch) cancels the pending timer and writes the latest state.
+  scheduleSave() {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+    }
+    this.saveTimer = setTimeout(() => {
+      this.saveTimer = null;
+      void this.syncAllLists();
+    }, 400);
   }
 
   // --- Item management (unchanged API) ---
@@ -133,37 +167,11 @@ export class ListStoreService {
   }
 
   setUpLists() {
-    console.time('setUpLists');
     this.checkedList.set(
       this.originalList().filter((item) => item.checked === true)
     );
     this.unCheckedList.set(
       this.originalList().filter((item) => item.checked === false)
     );
-    console.timeEnd('setUpLists');
-  }
-
-  updateLists(id: number) {
-    this.checkedList.update((value) => {
-      let item = value.find((i) => i.id === id);
-      if (item) {
-        let toUpdate = this.originalList().find((i) => i.id === id);
-        if (toUpdate) {
-          item = toUpdate;
-        }
-      }
-      return value;
-    });
-
-    this.unCheckedList.update((value) => {
-      let item = value.find((i) => i.id === id);
-      if (item) {
-        let toUpdate = this.originalList().find((i) => i.id === id);
-        if (toUpdate) {
-          item = toUpdate;
-        }
-      }
-      return value;
-    });
   }
 }
