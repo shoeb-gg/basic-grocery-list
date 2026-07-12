@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import {
   IonButton,
   IonIcon,
@@ -14,6 +14,7 @@ import { ListStoreService } from 'src/app/services/list-store.service';
   selector: 'app-list-selector',
   templateUrl: './list-selector.component.html',
   styleUrls: ['./list-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     IonButton,
     IonIcon,
