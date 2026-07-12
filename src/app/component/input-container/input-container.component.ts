@@ -1,4 +1,4 @@
-import { Component, effect, ViewChild } from '@angular/core';
+import { Component, effect, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { IonInput, IonItem, IonIcon, IonButton } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
@@ -11,6 +11,7 @@ import { ListStoreService } from 'src/app/services/list-store.service';
   selector: 'app-input-container',
   templateUrl: './input-container.component.html',
   styleUrls: ['./input-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [IonInput, IonItem, IonIcon, IonButton],
 })
 export class InputContainerComponent {

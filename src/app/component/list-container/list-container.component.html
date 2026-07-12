@@ -29,8 +29,8 @@
         enterkeyhint="done"
         mode="ios"
         [value]="listitem.itemName"
-        debounce="200"
         (ionInput)="valueChange(listitem.id, $event)"
+        (ionBlur)="blurItem(listitem.id)"
         class="line-through"
       >
       </ion-input>
@@ -65,8 +65,8 @@
           enterkeyhint="done"
           mode="ios"
           [value]="listitem.itemName"
-          debounce="200"
           (ionInput)="valueChange(listitem.id, $event)"
+          (ionBlur)="blurItem(listitem.id)"
         >
         </ion-input>
           <ion-reorder slot="end" aria-label="Reorder"></ion-reorder>

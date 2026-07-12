@@ -106,11 +106,30 @@ export class ListStoreService {
   }
 
   setMaxId() {
-    this.originalList().forEach((item) => {
-      if (item.id > this.maxId()) {
-        this.maxId.set(item.id);
-      }
-    });
+    const allIds = [
+      ...this.lists().flatMap((l) => l.items.map((i) => i.id)),
+      ...this.originalList().map((i) => i.id),
+    ];
+    const currentMax = allIds.reduce((max, id) => Math.max(max, id), 0);
+    if (currentMax > this.maxId()) {
+      this.maxId.set(currentMax);
+    }
+  }
+
+  restoreItem(item: ListItem, listId: number) {
+    const targetExists = this.lists().some((l) => l.id === listId);
+    if (this.activeListId() === listId || !targetExists) {
+      // Falls back to the active list if the source list itself was deleted
+      // in the meantime, so the item is never silently lost.
+      this.originalList.update((items) => [item, ...items]);
+      this.setUpLists();
+    } else {
+      this.lists.update((lists) =>
+        lists.map((l) => (l.id === listId ? { ...l, items: [item, ...l.items] } : l))
+      );
+    }
+    this.setMaxId();
+    this.syncAllLists();
   }
 
   setUpLists() {

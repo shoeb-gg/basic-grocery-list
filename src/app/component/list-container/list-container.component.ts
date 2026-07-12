@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, ChangeDetectionStrategy } from '@angular/core';
 
 import {
   IonList,
@@ -13,7 +13,8 @@ import {
   IonIcon,
   ItemReorderEventDetail,
 } from '@ionic/angular/standalone';
-import { Platform, ToastController } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
 import { trashOutline, closeCircle } from 'ionicons/icons';
@@ -29,6 +30,7 @@ import { ListItem } from 'src/models/ListItem';
   templateUrl: './list-container.component.html',
   styleUrls: ['./list-container.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     IonList,
     IonItem,
@@ -57,11 +59,6 @@ export class ListContainerComponent implements AfterViewInit {
   }
 
   async valueChange(id: number, event: CustomEvent) {
-    if (event.detail.value === '') {
-      this.deleteItem(id);
-      return;
-    }
-
     this.listStore.originalList.update((currentItems) => {
       const item = currentItems.find((i) => i.id === id);
       if (item) {
@@ -72,6 +69,13 @@ export class ListContainerComponent implements AfterViewInit {
 
     this.listStore.updateLists(id);
     await this.listStore.syncList();
+  }
+
+  async blurItem(id: number) {
+    const item = this.listStore.originalList().find((i) => i.id === id);
+    if (item && item.itemName.trim() === '') {
+      await this.deleteItem(id);
+    }
   }
 
   async checkItem(id: number) {
@@ -89,6 +93,7 @@ export class ListContainerComponent implements AfterViewInit {
 
   async deleteItemWithUndo(item: ListItem) {
     const deletedItem = { ...item };
+    const sourceListId = this.listStore.activeListId();
     await this.deleteItem(item.id);
 
     const toast = await this.toastCtrl.create({
@@ -101,9 +106,7 @@ export class ListContainerComponent implements AfterViewInit {
           text: 'UNDO',
           role: 'cancel',
           handler: () => {
-            this.listStore.originalList.update((items) => [deletedItem, ...items]);
-            this.listStore.setUpLists();
-            this.listStore.syncList();
+            this.listStore.restoreItem(deletedItem, sourceListId);
           },
         },
       ],

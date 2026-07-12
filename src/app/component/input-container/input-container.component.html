@@ -8,7 +8,6 @@
     [value]="inputHandler.inputValue()"
     (ionInput)="valueChange($event)"
     (ionBlur)="unfocusInput()"
-    debounce="200"
     (keyup.enter)="addAndBlur()"
     aria-label="Add new item"
   >
