@@ -1,16 +1,66 @@
-##To start Live Reloading App on Android:
+=====================================================================
+ Quick List — common commands
+ (See README.md and CLAUDE.md for full details.)
+=====================================================================
+
+## Dev server (browser) — http://localhost:4200
+npm start
+
+## Production web build -> www/
+npm run build
+
+## Sync web build + plugins into native projects
+npx cap sync android
+
+## Live-reload on device (serves from your machine)
 ionic capacitor run android -l --external
 
-##To start Live Reloading App on Web:
-ionic serve
-
-##To Open Build directory on Android Studio:
-ionic capacitor sync android
-ionic cap open android
+## Open the Android project in Android Studio
+npx cap open android
 
 
+=====================================================================
+ Build + install the debug APK on a connected device (Git Bash)
+=====================================================================
+# adb lives in the Android SDK platform-tools:
+#   /c/Users/<you>/AppData/Local/Android/Sdk/platform-tools/adb.exe
+# The JDK comes from Android Studio (no standalone JDK installed).
 
-##For errors like "Error: listen EACCES: permission denied 127.0.0.1:8100"
-Ensure that PowerShell is running as an administrator.
-Use the following command to stop winnat: net stop winnat
-Use the following command to restart winnat: net start winnat
+# 1) confirm the phone is attached + authorized
+"/c/Users/Shoeb/AppData/Local/Android/Sdk/platform-tools/adb.exe" devices
+
+# 2) build web + sync
+npm run build && npx cap sync android
+
+# 3) build + install onto the device
+cd android
+export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"
+export ANDROID_HOME="/c/Users/Shoeb/AppData/Local/Android/Sdk"
+./gradlew installDebug
+
+
+=====================================================================
+ Upgrading (careful — read CLAUDE.md "Gotchas" first)
+=====================================================================
+# Angular: one major at a time
+npx ng update @angular/core@N @angular/cli@N
+
+# Capacitor: bump packages then migrate (note: cap migrate has a CRLF bug on
+# Windows and may fail to update android/variables.gradle + the gradle wrapper;
+# apply those version bumps by hand).
+npx cap migrate
+
+# Do NOT bump TypeScript past Angular's peer range (currently ~6.0.3).
+
+
+=====================================================================
+ Troubleshooting
+=====================================================================
+# "Error: listen EACCES: permission denied 127.0.0.1:8100"
+# Run PowerShell as administrator, then:
+net stop winnat
+net start winnat
+
+# "No connected devices!" during ./gradlew installDebug
+# The phone dropped off USB — reconnect, unlock it, re-confirm the USB-debugging
+# prompt, and check: adb devices
