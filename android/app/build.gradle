@@ -17,8 +17,8 @@ android {
         applicationId "basic.grocery.list"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "2.1.0"
+        versionCode 3
+        versionName "2.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -37,6 +37,12 @@ android {
         }
     }
     buildTypes {
+        debug {
+            // Side-by-side dev install (basic.grocery.list.debug) so a debug build
+            // never replaces -- or wipes the data of -- the release app on the phone.
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-dev"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

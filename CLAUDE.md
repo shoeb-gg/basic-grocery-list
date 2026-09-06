@@ -20,7 +20,7 @@ no network at runtime.
 | Angular (standalone + signals) | 22 |
 | Ionic | 8 |
 | Capacitor (Android/iOS) | 8 |
-| Angular CDK (virtual scroll + drag-drop) | 22 |
+| Angular CDK (virtual scroll) | 22 |
 | TypeScript | ~6.0.3 (pinned — see gotchas) |
 | Tailwind (v4, PostCSS) | 4 |
 | Node.js | **≥ 22.22.3 or ≥ 24.15** (Angular 22 CLI requirement) |
@@ -77,13 +77,26 @@ Everything flows through a single signal store. The app is one screen —
   bottom chip bar while the keyboard is up (`.selector-card.keyboard-open`), and
   flushes pending writes on background (`visibilitychange` / Capacitor `pause`).
 - **`ListContainerComponent`** — the list. **CDK virtual scroll** (uniform 56px
-  rows; section headers are rows too). It owns scrolling: `ion-content` has
-  `[scrollY]="false"` and the CDK viewport is the scroller. Keyboard clearance
-  (`scrollIntoView` against the viewport) and scroll-to-bottom live here.
-  Reorder is **CDK drag-drop** (drag handle only, so it doesn't conflict with
-  swipe-to-delete or tap-to-edit), restricted to the to-do section via a sort
-  predicate, with rendered-range-offset index math mapped back to the unchecked
-  array.
+  rows; section headers are rows too; `templateCacheSize: 0` because Ionic web
+  components don't survive view recycling — recycled rows lost their checkbox /
+  input / icon). It owns scrolling: `ion-content` has `[scrollY]="false"` and
+  the CDK viewport is the scroller. The viewport is sized by CSS flex (hugs a
+  short list, caps and scrolls a long one; CDK's `contain: strict` is relaxed so
+  the spacer gives it an intrinsic height). A `ResizeObserver` on the viewport
+  and its spacer calls `checkViewportSize()` (CDK only re-measures on window
+  resize by itself) and then re-anchors: pin to bottom if the list was at the
+  bottom before the change or the add field is focused, otherwise keep a
+  focused row visible (via the viewport's own `scrollTop`, never
+  `scrollIntoView`, which would also scroll the overflow-hidden ancestors).
+  Scroll-to-bottom (startup / add / list switch) pins now, after render, and a
+  frame later.
+  Reorder is a purpose-built pointer drag (`row-drag.ts`), not CDK drag-drop
+  (unsupported inside virtual scroll — its indices counted detached rows). Drag
+  handle only. The drop slot is finger position ÷ row height, rows part via a
+  signal-driven transform (so rows rendered mid-drag are correct), a fixed
+  preview + slot indicator live on `<body>`, and holding near an edge
+  auto-scrolls with acceleration so a long to-do section can be reordered end
+  to end. Restricted to the to-do section.
 - **`InputContainerComponent`** — the add-item field (bottom).
 - **`ListSelectorComponent`** — chip bar for switching / creating / renaming /
   deleting lists.
@@ -114,6 +127,14 @@ owns keyboard scrolling itself and Ionic's assist fights it.
 - **No unit tests exist.** Verify changes by building and driving the real app —
   `npm start` in a browser for logic/UI, or install on the device for anything
   touching the keyboard, scrolling, reorder, or storage.
+- **UI harness:** `scripts/ui-harness.mjs` drives the dev build in headless
+  Chrome over CDP (no extra deps; needs Chrome installed and `npm start`
+  running). It seeds lists via Angular's dev-mode `ng` API, emulates the
+  keyboard (window resize + `keyboardOpen`), and checks bottom pinning,
+  focused-row visibility, blank rows, list switching, 5,000-item lists, and
+  drag-to-reorder (touch + mouse, auto-scroll, cancel, section clamp). Run
+  `node scripts/ui-harness.mjs`; every check prints PASS/FAIL. Re-run it after
+  touching anything in `list-container/`.
 - The `www/` dir and `.angular/` cache are build output (gitignored).
 
 ## Layout
@@ -126,7 +147,8 @@ src/app/
     storage.service.ts         @ionic/storage (IndexedDB) wrapper
     input-handler.service.ts   add-item input value/focus signals
   component/
-    list-container/            virtual-scrolled list + CDK drag reorder
+    list-container/            virtual-scrolled list, scroll anchoring,
+                               pointer-drag reorder (row-drag.ts)
     input-container/           add-item field
     list-selector/             multi-list chip bar
   models/ListItem.ts           ListItem, GroceryList types

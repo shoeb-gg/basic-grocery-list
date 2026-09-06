@@ -7,19 +7,17 @@
     </div>
   } @else {
     <cdk-virtual-scroll-viewport
-      class="ion-content-scroll-host list-viewport"
+      class="list-viewport"
+      [class.dragging]="drag.active()"
       [itemSize]="ROW_HEIGHT"
-      [style.height.px]="viewportHeight()"
-      cdkDropList
-      [cdkDropListSortPredicate]="sortPredicate"
-      (cdkDropListDropped)="drop($event)"
+      [minBufferPx]="BUFFER_MIN_PX"
+      [maxBufferPx]="BUFFER_MAX_PX"
     >
       <div
         class="v-row"
-        *cdkVirtualFor="let row of rows(); trackBy: trackRow"
-        cdkDrag
-        [cdkDragData]="row"
-        [cdkDragDisabled]="row.kind !== 'item' || row.section !== 'todo'"
+        *cdkVirtualFor="let row of rows(); let i = index; trackBy: trackRow; templateCacheSize: 0"
+        [class.drag-hidden]="row.kind === 'item' && drag.isHidden(row.item.id)"
+        [style.transform]="drag.shiftFor(i)"
       >
         @switch (row.kind) {
           @case ('done-header') {
@@ -29,7 +27,7 @@
             <div class="completed-divider"><span>to do ({{ row.count }})</span></div>
           }
           @default {
-            <ion-item-sliding>
+            <ion-item-sliding [disabled]="drag.active()">
               <ion-item>
                 <ion-checkbox
                   class="text-lg"
@@ -51,12 +49,21 @@
                 >
                 </ion-input>
                 @if (row.section === 'todo') {
+                  <!--
+                    Reorder handle. pointerdown hands the gesture to RowDragController;
+                    touchstart/mousedown are stopped here so ion-item-sliding's swipe
+                    gesture never starts from the handle, and the long-press context
+                    menu is suppressed so Android doesn't interrupt the drag.
+                  -->
                   <ion-icon
                     class="drag-handle"
                     name="reorder-three-outline"
                     slot="end"
-                    cdkDragHandle
                     aria-label="Reorder"
+                    (pointerdown)="drag.start($event, i, row.item.id, row.item.itemName)"
+                    (touchstart)="$event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    (contextmenu)="$event.preventDefault()"
                   ></ion-icon>
                 }
               </ion-item>

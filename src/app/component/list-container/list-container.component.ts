@@ -1,11 +1,14 @@
 import {
-  AfterViewInit,
-  Component,
   ChangeDetectionStrategy,
-  ViewChild,
+  Component,
+  DestroyRef,
   ElementRef,
+  Injector,
+  afterNextRender,
   computed,
-  signal,
+  effect,
+  inject,
+  viewChild,
 } from '@angular/core';
 
 import {
@@ -22,16 +25,12 @@ import {
   ScrollingModule,
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
-import {
-  DragDropModule,
-  CdkDragDrop,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
 
 import { addIcons } from 'ionicons';
 import { trashOutline, closeCircle, reorderThreeOutline } from 'ionicons/icons';
 
 import { InputContainerComponent } from '../input-container/input-container.component';
+import { RowDragController } from './row-drag';
 
 import { InputHandlerService } from 'src/app/services/input-handler.service';
 import { ListStoreService } from 'src/app/services/list-store.service';
@@ -43,8 +42,19 @@ type Row =
   | { kind: 'item'; item: ListItem; section: 'done' | 'todo' };
 
 // Every virtual row (items AND section headers) is exactly this tall so the
-// fixed-size virtual-scroll strategy positions rows without drift.
+// fixed-size virtual-scroll strategy positions rows without drift, and so the
+// reorder can turn a finger position into a slot with plain arithmetic.
 export const ROW_HEIGHT = 56;
+
+// Rows rendered beyond the visible area. Generous because the view cache is
+// off (Ionic web components don't survive recycling), so a fling has rows
+// ready instead of flashing empty space while new ones hydrate.
+const BUFFER_MIN_PX = ROW_HEIGHT * 8;
+const BUFFER_MAX_PX = ROW_HEIGHT * 16;
+
+// Gap kept between a focused row and the viewport edge (keyboard) when the
+// row is scrolled into view.
+const REVEAL_MARGIN_PX = 8;
 
 @Component({
   selector: 'app-list-container',
@@ -62,19 +72,24 @@ export const ROW_HEIGHT = 56;
     IonItemOption,
     IonIcon,
     ScrollingModule,
-    DragDropModule,
   ],
 })
-export class ListContainerComponent implements AfterViewInit {
+export class ListContainerComponent {
   readonly ROW_HEIGHT = ROW_HEIGHT;
+  readonly BUFFER_MIN_PX = BUFFER_MIN_PX;
+  readonly BUFFER_MAX_PX = BUFFER_MAX_PX;
 
-  @ViewChild(CdkVirtualScrollViewport)
-  viewport?: CdkVirtualScrollViewport;
+  // Present only while the list has rows (the empty state replaces it).
+  private readonly viewport = viewChild(CdkVirtualScrollViewport);
+  private readonly injector = inject(Injector);
 
-  // Measured live so the card hugs the content on short lists (messenger
-  // bottom-anchoring) but caps and scrolls on long lists.
-  private hostHeight = signal(0);
-  private inputHeight = signal(0);
+  // Viewport geometry as of the last anchor pass. Together with the current
+  // scrollTop this tells whether the list sat at the bottom *before* the
+  // layout change that triggered the current pass — without relying on scroll
+  // events, which fire a frame late and can read a half-resized box.
+  private prevScrollHeight = 0;
+  private prevClientHeight = 0;
+  private sizesKnown = false;
 
   // Flattened, uniform-height rows: [done header, done items, todo header,
   // todo items]. Section headers only appear where the original UI showed
@@ -97,124 +112,167 @@ export class ListContainerComponent implements AfterViewInit {
 
   isEmpty = computed(() => this.rows().length === 0);
 
-  viewportHeight = computed(() => {
-    const content = this.rows().length * ROW_HEIGHT;
-    const avail = this.hostHeight() - this.inputHeight() - 8; // 8px breathing gap
-    if (avail <= 0) return content; // not measured yet — size to content
-    return Math.min(content, avail);
+  // To-do rows are contiguous at the tail of `rows`; this is the only range a
+  // drag may start in or land on.
+  private readonly todoRange = computed(() => {
+    const rows = this.rows();
+    const start = rows.findIndex((r) => r.kind === 'item' && r.section === 'todo');
+    return start < 0 ? null : { start, end: rows.length };
+  });
+
+  readonly drag = new RowDragController({
+    viewportEl: () => this.viewportEl(),
+    rowHeight: ROW_HEIGHT,
+    slotRange: () => this.todoRange(),
+    commit: (fromRow, toRow, sourceId) => this.commitReorder(fromRow, toRow, sourceId),
   });
 
   constructor(
     public readonly inputHandler: InputHandlerService,
     public readonly listStore: ListStoreService,
     private readonly toastCtrl: ToastController,
-    private readonly hostEl: ElementRef<HTMLElement>
+    hostEl: ElementRef<HTMLElement>,
+    destroyRef: DestroyRef
   ) {
     addIcons({ trashOutline, closeCircle, reorderThreeOutline });
-  }
 
-  ngAfterViewInit(): void {
-    // Track the host (fills the content area) and the add-item input so the
-    // viewport can be capped at exactly the free space above the input.
-    const host = this.hostEl.nativeElement;
-    const inputEl = host.querySelector('app-input-container') as HTMLElement | null;
-    const measure = () => {
-      this.hostHeight.set(host.clientHeight);
-      if (inputEl) this.inputHeight.set(inputEl.offsetHeight);
-      // The keyboard opening/closing resizes the host; re-anchor the focused
-      // field once the viewport has taken its new size.
-      this.scheduleKeepFocusVisible();
-    };
-    const ro = new ResizeObserver(measure);
-    ro.observe(host);
-    if (inputEl) ro.observe(inputEl);
-    measure();
+    // ion-content doesn't scroll; the app shell asks us to land on the newest
+    // rows after startup, add, and list switch.
+    this.listStore.scrollToBottomFn = () => this.scrollToBottom();
 
-    // Also re-anchor immediately when focus moves between fields.
-    host.addEventListener('focusin', () => this.scheduleKeepFocusVisible());
-
-    // ion-content no longer scrolls; hand the app shell a scroll-to-bottom
-    // hook that uses the CDK viewport API (reliable on a fresh virtual list).
-    this.listStore.scrollToBottomFn = () => {
-      const vp = this.viewport;
+    // Wire up the viewport whenever it (re)appears — the empty state swaps it
+    // out — and tear down when it goes away.
+    effect((onCleanup) => {
+      const vp = this.viewport();
       if (!vp) return;
-      // Two-pass: the first offset commits the render, the next frame lands
-      // exactly at the bottom once the full content size is known.
-      const target = this.rows().length * ROW_HEIGHT;
-      vp.scrollToOffset(target, 'auto');
-      requestAnimationFrame(() => vp.scrollToOffset(target, 'auto'));
-    };
-    this.listStore.onListSwitch?.();
-  }
+      const el = vp.elementRef.nativeElement;
+      this.sizesKnown = false; // a fresh viewport opens at its newest rows
 
-  // Keyboard show/hide and focus changes settle across a few frames; re-run
-  // the anchor a couple of times so we're the last word once the layout is
-  // stable, not scrolling against a viewport that's still resizing.
-  private scheduleKeepFocusVisible() {
-    [0, 120, 300].forEach((d) => setTimeout(() => this.keepFocusVisible(), d));
-  }
+      // CDK only re-measures on window resize. Our height changes also come
+      // from the chip bar collapsing/expanding and from the row count, so tell
+      // it every time the box or the content size actually changes — then
+      // re-anchor. Observing the spacer catches "rows were added while we sat
+      // at the bottom" precisely when the new height has been applied.
+      const ro = new ResizeObserver(() => {
+        vp.checkViewportSize();
+        this.anchor();
+      });
+      ro.observe(el);
+      const spacer = el.querySelector('.cdk-virtual-scroll-spacer');
+      if (spacer) ro.observe(spacer);
 
-  private keepFocusVisible() {
-    const active = document.activeElement as HTMLElement | null;
-    if (!active || active === document.body) return;
+      onCleanup(() => ro.disconnect());
+    });
 
-    // The add-item field is below the viewport; instead of scrolling it (it
-    // can't move), bring the list to the bottom so the newest items show.
-    if (active.closest('app-input-container')) {
-      this.listStore.scrollToBottomFn?.();
-      return;
-    }
-
-    // An item's input: align its bottom to the viewport's visible bottom edge
-    // (which sits just above the keyboard). scrollIntoView does the math
-    // against the real scroll container; scroll-margin-bottom adds the gap.
-    const vpEl = this.viewport?.elementRef.nativeElement;
-    if (vpEl && vpEl.contains(active)) {
-      active.scrollIntoView({ block: 'end', behavior: 'auto' });
-    }
+    // Moving focus between fields (keyboard already up) needs the same
+    // treatment as a resize.
+    const host = hostEl.nativeElement;
+    const onFocusIn = () => this.anchor();
+    host.addEventListener('focusin', onFocusIn);
+    destroyRef.onDestroy(() => {
+      host.removeEventListener('focusin', onFocusIn);
+      this.drag.cancel();
+    });
   }
 
   trackRow = (_: number, row: Row): string | number =>
     row.kind === 'item' ? 'i' + row.item.id : row.kind;
 
-  // --- Reorder (CDK drag-drop over the virtualized list) ---
+  // --- Scroll anchoring ---
 
-  // Only allow the drop placeholder to land on a to-do item position. `index`
-  // is relative to the rendered window, so add the rendered range's start to
-  // map it back to the full combined-row array.
-  sortPredicate = (index: number): boolean => {
-    if (!this.viewport) return false;
-    const row = this.rows()[this.viewport.getRenderedRange().start + index];
-    return !!row && row.kind === 'item' && row.section === 'todo';
-  };
+  private viewportEl(): HTMLElement | null {
+    return this.viewport()?.elementRef.nativeElement ?? null;
+  }
 
-  async drop(event: CdkDragDrop<Row[]>) {
-    if (!this.viewport) return;
-    const rows = this.rows();
-    const start = this.viewport.getRenderedRange().start;
-    const from = start + event.previousIndex;
-    const to = start + event.currentIndex;
+  // Decide where the list should sit after a layout change (keyboard, chip
+  // bar, row count) or a focus change:
+  //  1. add-item field focused -> newest rows must be visible: pin to bottom;
+  //  2. we were at the bottom -> stay there (messenger behaviour);
+  //  3. a row's field is focused -> make sure that row is on screen.
+  // Order matters: pinning first and then revealing means "editing the
+  // second-to-last row" still shows the last row when there is room.
+  private anchor(): void {
+    const el = this.viewportEl();
+    if (!el) return;
+    if (this.drag.active()) {
+      this.recordSizes(el);
+      return;
+    }
 
-    const fromRow = rows[from];
-    if (!fromRow || fromRow.kind !== 'item' || fromRow.section !== 'todo') return;
+    // "Were we at the bottom?" — against the previous geometry (the box just
+    // shrank: scrollTop is unchanged, so the old maximum tells) OR the current
+    // one (the box just grew: the browser already clamped us to the new
+    // maximum). A user who scrolled away fails both. Before the first pass
+    // there is nothing to compare, and a fresh list opens at its newest rows.
+    const st = el.scrollTop;
+    const nowAtBottom = el.scrollHeight - el.clientHeight - st <= 1;
+    const wasAtBottom = this.prevScrollHeight - this.prevClientHeight - st <= 1;
+    const pinToBottom = !this.sizesKnown || nowAtBottom || wasAtBottom;
 
-    // Translate combined-array indices into the unchecked array (to-do items
-    // are contiguous at the tail of the combined array).
-    const todoStart = rows.findIndex(
-      (r) => r.kind === 'item' && r.section === 'todo'
-    );
-    if (todoStart < 0) return;
+    const active = document.activeElement as HTMLElement | null;
+    if (active?.closest('app-input-container') || pinToBottom) this.pin(el);
+    if (active && el.contains(active)) this.revealRow(el, active);
+    this.recordSizes(el);
+  }
 
+  private recordSizes(el: HTMLElement): void {
+    this.prevScrollHeight = el.scrollHeight;
+    this.prevClientHeight = el.clientHeight;
+    this.sizesKnown = true;
+  }
+
+  private pin(el: HTMLElement): void {
+    el.scrollTop = el.scrollHeight; // the browser clamps to the real maximum
+  }
+
+  // Minimal scroll so the focused row is fully inside the viewport, done with
+  // the viewport's own scrollTop rather than scrollIntoView, which would also
+  // scroll every overflow:hidden ancestor (ion-content, the card) and leave
+  // them stuck.
+  private revealRow(el: HTMLElement, active: HTMLElement): void {
+    const row = active.closest('.v-row') as HTMLElement | null;
+    if (!row) return;
+    const vr = el.getBoundingClientRect();
+    const rr = row.getBoundingClientRect();
+    if (rr.bottom > vr.bottom - REVEAL_MARGIN_PX) {
+      el.scrollTop += rr.bottom - (vr.bottom - REVEAL_MARGIN_PX);
+    } else if (rr.top < vr.top + REVEAL_MARGIN_PX) {
+      el.scrollTop -= vr.top + REVEAL_MARGIN_PX - rr.top;
+    }
+  }
+
+  // Pin now, after the pending render (new rows / spacer applied), and one
+  // frame later. From then on the ResizeObserver keeps us pinned as long as
+  // the user doesn't scroll away.
+  private scrollToBottom(): void {
+    const pinNow = () => {
+      const el = this.viewportEl();
+      if (el) this.pin(el);
+    };
+    pinNow();
+    afterNextRender(pinNow, { injector: this.injector });
+    requestAnimationFrame(pinNow);
+  }
+
+  // --- Reorder ---
+
+  private commitReorder(fromRow: number, toRow: number, sourceId: number): void {
+    const range = this.todoRange();
+    if (!range) return;
     const unchecked = [...this.listStore.unCheckedList()];
-    const clamp = (n: number) => Math.max(0, Math.min(unchecked.length - 1, n));
-    const uFrom = clamp(from - todoStart);
-    const uTo = clamp(to - todoStart);
-    if (uFrom === uTo) return;
+    // Locate the dragged item by id (authoritative), falling back to the row
+    // index it was grabbed at.
+    let uFrom = unchecked.findIndex((it) => it.id === sourceId);
+    if (uFrom < 0) uFrom = fromRow - range.start;
+    const uTo = Math.max(0, Math.min(unchecked.length - 1, toRow - range.start));
+    if (uFrom < 0 || uFrom >= unchecked.length || uFrom === uTo) return;
 
-    moveItemInArray(unchecked, uFrom, uTo);
+    const [item] = unchecked.splice(uFrom, 1);
+    unchecked.splice(uTo, 0, item);
+
     this.listStore.unCheckedList.set(unchecked);
     this.listStore.originalList.set([...this.listStore.checkedList(), ...unchecked]);
-    await this.listStore.syncList();
+    void this.listStore.syncList();
   }
 
   // --- Item editing / toggling / deleting (unchanged behavior) ---

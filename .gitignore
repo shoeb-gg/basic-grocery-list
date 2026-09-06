@@ -71,3 +71,8 @@ Thumbs.db
 
 # Claude Code local settings
 /.claude/settings.local.json
+
+# headless-Chrome profile created by scripts/ui-harness.mjs
+scripts/chrome-profile/
+scripts/device-shots/
+scripts/device-run.log

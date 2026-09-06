@@ -80,6 +80,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.listStore.onListSwitch = () => {
+      // Pin right away (this also marks the list as bottom-anchored, so the
+      // keyboard closing / chip bar returning keep it there) and again once
+      // the new rows have had a moment to render.
+      this.scrollToBottom();
       setTimeout(() => this.scrollToBottom(), 50);
     };
 

@@ -39,7 +39,7 @@ no account, no internet.
 - 🅰️ &nbsp;**Angular 22** — standalone components, signals, OnPush change detection
 - ⚡ &nbsp;**Ionic 8** — UI components
 - 📱 &nbsp;**Capacitor 8** — native Android / iOS shell
-- 🧩 &nbsp;**Angular CDK** — virtual scroll + drag-and-drop
+- 🧩 &nbsp;**Angular CDK** — virtual scroll (reorder is a purpose-built pointer drag)
 - 🎨 &nbsp;**Tailwind CSS 4**
 - 💾 &nbsp;**@ionic/storage** — IndexedDB persistence
 
